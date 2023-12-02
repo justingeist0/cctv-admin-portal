@@ -1,0 +1,21 @@
+.content-container {
+  background-color: #00162A;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding-left: .34%;
+  padding-right: .34%;
+}
+
+.column {
+  margin-top: .34%;
+  width: 33%;
+  padding-bottom: 10px;
+}
+
+.column-wide {
+  margin-top: .34%;
+  width: 66.3%;
+  padding-bottom: 10px;
+}

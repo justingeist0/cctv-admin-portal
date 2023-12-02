@@ -1,0 +1,31 @@
+.text-container {
+  display: flex;
+  align-items: center;
+  padding: 0px;
+  margin: 0px;
+  margin-bottom: 6px;
+}
+
+.text-icon {
+  margin-right: 16px; /* optional: to add some space between the icon and the text */
+  margin-top: 0px;
+  padding-top: 0px;
+}
+
+.main-text {
+  font-weight: bold; 
+}
+
+.sub-text {
+  font-weight: '400';
+}
+
+.hover:hover .text-icon {
+  fill: #00284E;
+}
+
+.icon-text-text {
+  margin: 0px;
+  padding-left: 6px;
+  text-transform: capitalize;
+}
