@@ -1,10 +1,76 @@
-.venue-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    background-color: #00284E;
-    border-radius: 10px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-  }
-  
+.device-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.image-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-gap: 10px;
+}
+
+.image-svg-container {    
+  display: flex;
+}
+
+.image-svg {
+  color: #00284E;
+  fill: #7AB2E5;
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.moveable {
+  cursor: move;
+}
+
+.trash-icon {
+  color: red;
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+
+.item {
+  flex: 1 0 200px; /* Minimum width of 200px, and flexible to grow */
+  margin: 0px;    /* Add some margin between items for spacing */
+}
+
+.item a img,
+.item a video {  
+  width: 100%;      /* Make the image or video take 100% width of the container */
+  height: auto;     /* Maintain the aspect ratio */
+  min-width: 200px; /* Minimum width */
+}
+
+.device-tab-button-selected {
+  fill: #7AB2E5;
+  color: #00284E;
+  margin-top: auto;
+  margin-bottom: auto;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 4px;
+  background-color: #7AB2E5;
+  border-radius: 10px;
+}
+
+.device-tab-button {
+  color: #7AB2E5;
+  fill: #00284E;
+  margin-top: auto;
+  margin-bottom: auto;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 4px;
+  border-radius: 10px;
+}
+
+.device-tab-button:hover {
+  fill: #7AB2E5;
+  color: #00284E;
+  background-color: #7AB2E5;
+}
+
+

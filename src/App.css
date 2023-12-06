@@ -37,6 +37,10 @@
     fill: #7AB2E5;
 }
 
+a {
+    color: #7AB2E5;
+}
+
 .svg {
     color: #7AB2E5;
     fill: #00284E;
@@ -65,6 +69,7 @@
 h2 {
     margin-top: 0;
     margin-bottom: 0;
+    text-transform: capitalize;
 }
 
 .clickable {
@@ -84,4 +89,14 @@ h2 {
 
 img {
     fill: #7AB2E5
+}
+
+h3, h4 {
+    margin: 0px;
+    text-transform: capitalize;
+}
+
+.cancel {
+    margin-left: '12px';
+    font-size: '12px';
 }

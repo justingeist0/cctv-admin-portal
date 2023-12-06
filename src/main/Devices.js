@@ -16,8 +16,11 @@ function Devices({ venue, selectDevice }) {
     }, [venue]);
 
     return (
-        <div className='device'>
+        <div className='container '>
             <h2>{venue ? `${venue.name}'s Devices` : "Select Venue"}</h2>
+            {venue &&
+              <button className='clickable hover' style={{marginTop: "6px"}}>Add Device</button>
+            }
             {devices.map(device => (
                 <Device key={device._id} device={device} selectDevice={selectDevice} />
             ))}
