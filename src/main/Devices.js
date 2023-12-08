@@ -19,7 +19,7 @@ function Devices({ venue, selectDevice }) {
             const token = await getToken();
             await updateDeviceDropDown(token, venue._id, setDevices);
         })
-    }, [venue]);
+    }, [venue, getToken]);
 
     const addDevice = async () => {
       if (name === "") { 
@@ -90,7 +90,7 @@ function Devices({ venue, selectDevice }) {
                   <h4>Remote Connection Link:</h4>
                   <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Getscreen.me link..."} text={remoteLink} handleInputChange={(e) =>{ setRemoteLink(e.target.value) }}/>
                   <button className='clickable hover' style={{marginTop: "6px"}} onClick={addDevice}>Add Device</button>
-                  <a className='hover' style={{marginLeft: "12px"}} onClick={() => { setIsAddDevice(false) }}>Cancel</a>
+                  <p className='hover' style={{marginLeft: "12px"}} onClick={() => { setIsAddDevice(false) }}>Cancel</p>
                   <br/>
                   <br/>
               </div>

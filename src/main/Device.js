@@ -77,7 +77,7 @@ const Device = ({ device, selectDevice }) => {
   const addAd = () => {
     const text = addAdUrl
     if (`${text}`.length > 0) {
-      if (text[0] == '{')
+      if (text[0] === '{')
         setAdUrls([...adUrls, JSON.parse(text)])
       else
         setAdUrls([...adUrls, {url: text, duration: 10}])
@@ -144,7 +144,7 @@ const Device = ({ device, selectDevice }) => {
             <Ad className={showAds ? 'device-tab-button-selected' : 'device-tab-button'} onClick={() => { setShowAds(!showAds) }}/>
             <Info className={showInfo ? 'device-tab-button-selected' : 'device-tab-button'} onClick={() => { setShowInfo(!showInfo) }}/>
             <AddImage className={isAddImage ? 'device-tab-button-selected' : 'device-tab-button'} onClick={() => { setIsAddImage(!isAddImage) }}/>
-            <a style={{marginLeft: "12px"}}>{statusMessage}</a>
+            <p style={{marginLeft: "12px"}}>{statusMessage}</p>
           </div>
           <div>
             <button className='clickable hover' onClick={undo}>Undo All</button>
@@ -156,11 +156,11 @@ const Device = ({ device, selectDevice }) => {
         <div>
           <br/>
           <IconInputText src={<AddImage className="text-input-icon" />} placeholderText={"Paste Ad Media URL or Copied Ad here..."} text={addAdUrl} handleInputChange={handleAddAdInput}/>
-          <a className='hover' href='https://console.firebase.google.com/u/0/project/adtv-64129/storage/adtv-64129.appspot.com/files' target='_blank'>Upload Ad Here and Copy the URL</a>
+          <a className='hover' href='https://console.firebase.google.com/u/0/project/adtv-64129/storage/adtv-64129.appspot.com/files' target='_blank' rel="noreferrer">Upload Ad Here and Copy the URL</a>
           <br/>
           <br/>
           <button className='clickable hover' onClick={() => { addAd() }}>Add Ad</button>
-          <a style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={() => { setIsAddImage(false) }}>Cancel</a>
+          <p style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={() => { setIsAddImage(false) }}>Cancel</p>
         </div>
       )}
       {isExpanded && showInfo && (
@@ -202,21 +202,21 @@ function ImageComponent({index, handleDragEnd, handleDragStart, handleDragOver, 
     <div>
       <IconInputText src={<Ad className="text-input-icon" />} placeholderText={"Ad Name..."} text={adName} handleInputChange={(e) =>{ setAdName(e.target.value); img['name'] = e.target.value }} isAboveAd={true}/>
     </div>
-    <a className='moveable' draggable onDragStart={(event) => handleDragStart(event, index)} onDragOver={(event) => handleDragOver(event, index)}>
+    <p className='moveable' draggable onDragStart={(event) => handleDragStart(event, index)} onDragOver={(event) => handleDragOver(event, index)}>
       {!img.url.includes(".mp4") ? (
-        <img src={img.url || ""} alt="Click to view image, this URL is probably wrong" className="media-element" />
+        <img src={img.url || ""} alt="Click to view, this URL is probably wrong" className="media-element" />
       ) : (
         <video autoPlay muted loop controls height="200" className="media-element">
           <source src={img.url} type="video/mp4" />
           Your browser does not support the video tag, please use a different browser.
         </video>
       )}
-    </a>
+    </p>
     {!isEditingDuration &&
       <div className='image-svg-container'>
         <Delete className='trash-icon' title="Delete Ad" onClick={() => { deleteAd(index); } } />
         <div className='hover device-header' title="Set Duration" onClick={() => { setIsEditingDuration(true); } }>
-          <a style={{ marginRight: '2px', padding: '0' }}>{img.duration}</a>
+          <p style={{ marginRight: '2px', padding: '0' }}>{img.duration}</p>
           <Delay className='image-svg'/>
         </div>
         <Expand className='image-svg' title="Full Screen Preview" onClick={() => { window.open(img.url, "_blank"); } } />

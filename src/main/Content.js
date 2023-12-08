@@ -10,7 +10,7 @@ import { useAuth } from '../AuthContext';
 const Content = () => {
     const [venues, setVenues] = useState([]);
     const [venue, setVenue] = useState(null);
-    const [device, setDevice] = useState(null);
+    //const [device, setDevice] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const { getToken } = useAuth();
 
@@ -19,7 +19,7 @@ const Content = () => {
             const token = await getToken();
             await updateVenueDropDown(token, setVenues);
         })
-    }, []);
+    }, [getToken]);
 
     const editVenue = async (venue) => {  
         const token = await getToken();
@@ -47,7 +47,7 @@ const Content = () => {
                 <Venues selectVenue={setVenue} venues={venues} editVenue={editVenue}/>
             </div>
             <div className="column-wide">
-                <Devices venue={venue} selectDevice={setDevice} />
+                <Devices venue={venue} selectDevice={() => {}} />
             </div>
         </div>
     );

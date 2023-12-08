@@ -59,7 +59,7 @@ const Venue = ({ venue, selectVenue, isVenueSelected, editVenue }) => {
       )}
       <button className='clickable hover' onClick={handleEdit}>{(name === "" && editing) ? "Delete" : editing ? 'Save' : 'Edit'}</button>
       {editing &&
-        <a style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={() => { setEditing(false) }}>Cancel</a>
+        <p style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={() => { setEditing(false) }}>Cancel</p>
       }
       </div>
 

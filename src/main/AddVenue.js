@@ -50,7 +50,7 @@ const VenueEditBox = ({ addVenue, close }) => {
         <button className='clickable hover' onClick={() => {
           addVenueRequest(name, address, phone, getToken(), addVenue, close);
         }}>Add Venue</button>
-        <a style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={close}>Cancel</a>
+        <p style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={close}>Cancel</p>
       </div>
     </div>
   );
