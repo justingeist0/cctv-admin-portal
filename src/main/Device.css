@@ -37,8 +37,8 @@
   margin: 0px;    /* Add some margin between items for spacing */
 }
 
-.item a img,
-.item a video {  
+.item div img,
+.item div video {  
   width: 100%;      /* Make the image or video take 100% width of the container */
   height: auto;     /* Maintain the aspect ratio */
   min-width: 200px; /* Minimum width */

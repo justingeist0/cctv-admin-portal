@@ -202,7 +202,7 @@ function ImageComponent({index, handleDragEnd, handleDragStart, handleDragOver, 
     <div>
       <IconInputText src={<Ad className="text-input-icon" />} placeholderText={"Ad Name..."} text={adName} handleInputChange={(e) =>{ setAdName(e.target.value); img['name'] = e.target.value }} isAboveAd={true}/>
     </div>
-    <p className='moveable' draggable onDragStart={(event) => handleDragStart(event, index)} onDragOver={(event) => handleDragOver(event, index)}>
+    <div className='moveable' draggable onDragStart={(event) => handleDragStart(event, index)} onDragOver={(event) => handleDragOver(event, index)}>
       {!img.url.includes(".mp4") ? (
         <img src={img.url || ""} alt="Click to view, this URL is probably wrong" className="media-element" />
       ) : (
@@ -211,12 +211,12 @@ function ImageComponent({index, handleDragEnd, handleDragStart, handleDragOver, 
           Your browser does not support the video tag, please use a different browser.
         </video>
       )}
-    </p>
+    </div>
     {!isEditingDuration &&
       <div className='image-svg-container'>
         <Delete className='trash-icon' title="Delete Ad" onClick={() => { deleteAd(index); } } />
         <div className='hover device-header' title="Set Duration" onClick={() => { setIsEditingDuration(true); } }>
-          <p style={{ marginRight: '2px', padding: '0' }}>{img.duration}</p>
+          <p style={{ margin: '0',marginRight: '2px', padding: '0' }}>{img.duration}</p>
           <Delay className='image-svg'/>
         </div>
         <Expand className='image-svg' title="Full Screen Preview" onClick={() => { window.open(img.url, "_blank"); } } />
