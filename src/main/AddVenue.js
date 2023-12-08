@@ -4,14 +4,15 @@ import IconInputText from './view/IconInputText';
 import {ReactComponent as NameIcon} from './svg/user_card.svg';
 import {ReactComponent as AddressIcon} from './svg/address.svg';
 import {ReactComponent as PhoneIcon} from './svg/phone.svg';
+import { useAuth } from '../AuthContext';
 
-const AddVenue = ({ refreshVenues }) => {
+const AddVenue = ({ addVenue }) => {
   const [isAdding, setIsAdding] = useState(false);
 
   return (
     <div className='container'>
       {isAdding ? 
-        <VenueEditBox refreshVenues={refreshVenues} close={() => setIsAdding(false)} />
+        <VenueEditBox addVenue={addVenue} close={() => setIsAdding(false)} />
        : 
         <button className='clickable hover' onClick={() => { setIsAdding(true)}}>Add a new Venue</button>
       }
@@ -19,7 +20,8 @@ const AddVenue = ({ refreshVenues }) => {
   );
 };
 
-const VenueEditBox = ({ refreshVenues, close }) => {
+const VenueEditBox = ({ addVenue, close }) => {
+  const { getToken } = useAuth();
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -46,9 +48,7 @@ const VenueEditBox = ({ refreshVenues, close }) => {
           <IconInputText src={<PhoneIcon className="text-input-icon" />} placeholderText={"Phone..."} text={phone} handleInputChange={handlePhoneChange}/>
         </>
         <button className='clickable hover' onClick={() => {
-          addVenue(name, address);
-          refreshVenues();
-          close();
+          addVenueRequest(name, address, phone, getToken(), addVenue, close);
         }}>Add Venue</button>
         <a style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={close}>Cancel</a>
       </div>
@@ -56,8 +56,42 @@ const VenueEditBox = ({ refreshVenues, close }) => {
   );
 };
 
-const addVenue = (name, address) => {
-
+const addVenueRequest = (name, address, phone, getToken, addVenue, close) => {
+  if (name === "") {
+    alert("Please enter a name for the venue.");
+    return;
+  }
+  if (address === "") {
+    alert("Please enter an address for the venue.");
+    return;
+  }
+  const data = {
+    name: name,
+    address: address,
+    phone: phone
+  }
+  getToken.then((token) => {
+    fetch(process.env.REACT_APP_API_URL + "/add-client", {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+          "Authorization": token
+      },
+      body: JSON.stringify(data)
+  })
+  .then(response => {
+      return response.json()
+  })
+  .then(json => {
+      data["_id"] = json.insertedId;
+      console.log(data);
+      addVenue(data);
+      close();
+  })
+  .catch(error => {
+      console.error("Fetch error: ", error);
+  });
+  })
 }
 
 export default AddVenue;

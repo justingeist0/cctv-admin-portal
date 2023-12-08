@@ -11,6 +11,9 @@ import { ReactComponent as Close } from './svg/close_circle.svg';
 import { ReactComponent as Check } from './svg/check_circle.svg';
 import { ReactComponent as Ad } from './svg/ad.svg';
 import { ReactComponent as Info } from './svg/info.svg';
+import { useAuth } from '../AuthContext';
+
+let isFetching = false
 
 const Device = ({ device, selectDevice }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -18,9 +21,14 @@ const Device = ({ device, selectDevice }) => {
   const [showInfo, setShowInfo] = useState(false);
   const [showAds, setShowAds] = useState(true);
   const [name, setName] = useState(device.name);
+  const [password, setPassword] = useState(device.password);
+  const [remoteLink, setRemoteLink] = useState(device.remoteLink);
   const [adUrls, setAdUrls] = useState(device.images || []);
   const [statusMessage, setStatusMessage] = useState("");
   const [addAdUrl, setAddAdUrl] = useState("");
+  const [deleted, setDeleted] = useState(false);
+  const { getToken } = useAuth();
+
   let mStartIdx = -1;
   let mEndIdx = -1;
 
@@ -66,6 +74,64 @@ const Device = ({ device, selectDevice }) => {
     setAddAdUrl(e.target.value);
   }
 
+  const addAd = () => {
+    const text = addAdUrl
+    if (`${text}`.length > 0) {
+      if (text[0] == '{')
+        setAdUrls([...adUrls, JSON.parse(text)])
+      else
+        setAdUrls([...adUrls, {url: text, duration: 10}])
+      setAddAdUrl("");
+    } else {
+      alert("This isn't a valid URL or Ad object")
+    }
+  }
+
+  const saveAll = async () => {
+    if (isFetching)
+      return
+    isFetching = true
+    const token = await getToken();
+    device['images'] = adUrls;
+    device['name'] = name;
+    device['password'] = password;
+    device['remoteLink'] = remoteLink;
+
+    fetch(process.env.REACT_APP_API_URL + `/devices/${device._id}`, {
+      method: 'PUT',
+      headers: {
+        "Authorization": token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(device)
+    })
+    .then(response => {
+      if (response.ok){
+        showStatusMessage("Saved Changes");
+        if (name === "")
+          setDeleted(true)
+      }
+      else
+       showStatusMessage("Error Saving Changes");
+      isFetching = false
+    })
+    .catch((error) => {
+      console.error("Error fetching data: ", error);
+      isFetching = false
+    });
+  }
+  
+  const undo = () => { 
+    setAdUrls(device.images || [])
+    setName(device.name)
+    setPassword(device.password)
+    setRemoteLink(device.remoteLink)
+  }
+
+  if (deleted) {
+    return (<div></div>)
+  }
+
   return (
     <div className='box'>
       <div className='device-header' onClick={() => setIsExpanded(!isExpanded)}>
@@ -81,19 +147,19 @@ const Device = ({ device, selectDevice }) => {
             <a style={{marginLeft: "12px"}}>{statusMessage}</a>
           </div>
           <div>
-            <button className='clickable hover' onClick={() => { setAdUrls(device.images || []) }}>Undo All</button>
-            <button className='clickable hover' style={{marginLeft: "12px"}}>Save Changes</button>
+            <button className='clickable hover' onClick={undo}>Undo All</button>
+            <button className='clickable hover' style={{marginLeft: "12px"}} onClick={saveAll}>{name === "" ? "Delete" : "Save Changes"}</button>
           </div>
         </div>
       )}
       {isExpanded && isAddImage && (
         <div>
           <br/>
-          <IconInputText src={<AddImage className="text-input-icon" />} placeholderText={"Paste Ad Media URL here..."} text={addAdUrl} handleInputChange={handleAddAdInput}/>
+          <IconInputText src={<AddImage className="text-input-icon" />} placeholderText={"Paste Ad Media URL or Copied Ad here..."} text={addAdUrl} handleInputChange={handleAddAdInput}/>
           <a className='hover' href='https://console.firebase.google.com/u/0/project/adtv-64129/storage/adtv-64129.appspot.com/files' target='_blank'>Upload Ad Here and Copy the URL</a>
           <br/>
           <br/>
-          <button className='clickable hover' onClick={() => { setIsAddImage(false) }}>Add Ad</button>
+          <button className='clickable hover' onClick={() => { addAd() }}>Add Ad</button>
           <a style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={() => { setIsAddImage(false) }}>Cancel</a>
         </div>
       )}
@@ -103,9 +169,9 @@ const Device = ({ device, selectDevice }) => {
           <h4>Device Name:</h4>
           <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={name} handleInputChange={(e) => { setName(e.target.value) }}/>
           <h4>Device Password:</h4>
-          <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={`https://cc-tv.onrender.com/obs?deviceId=${device._id}`} handleInputChange={(e) =>{ }}/>
+          <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={password} handleInputChange={(e) =>{ setPassword(e.target.value) }}/>
           <h4>Remote Connection Link:</h4>
-          <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={`https://cc-tv.onrender.com/obs?deviceId=${device._id}`} handleInputChange={(e) =>{ }}/>
+          <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={remoteLink} handleInputChange={(e) =>{ setRemoteLink(e.target.value) }}/>
           <h4>OBS Website Link:</h4>
           <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={`https://cc-tv.onrender.com/obs?deviceId=${device._id}`} handleInputChange={(e) =>{ }}/>
         </div>
@@ -134,7 +200,7 @@ function ImageComponent({index, handleDragEnd, handleDragStart, handleDragOver, 
 
   return <div key={index} className='item' onDragEnd={handleDragEnd}>
     <div>
-    <IconInputText src={<Ad className="text-input-icon" />} placeholderText={"Ad Name..."} text={adName} handleInputChange={(e) =>{ setAdName(e.target.value) }} isAboveAd={true}/>
+      <IconInputText src={<Ad className="text-input-icon" />} placeholderText={"Ad Name..."} text={adName} handleInputChange={(e) =>{ setAdName(e.target.value); img['name'] = e.target.value }} isAboveAd={true}/>
     </div>
     <a className='moveable' draggable onDragStart={(event) => handleDragStart(event, index)} onDragOver={(event) => handleDragOver(event, index)}>
       {!img.url.includes(".mp4") ? (

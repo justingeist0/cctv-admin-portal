@@ -6,13 +6,26 @@ import {ReactComponent as NameIcon} from './svg/user_card.svg';
 import {ReactComponent as AddressIcon} from './svg/address.svg';
 import {ReactComponent as PhoneIcon} from './svg/phone.svg';
 
-const Venue = ({ venue, selectVenue, isVenueSelected }) => {
+const Venue = ({ venue, selectVenue, isVenueSelected, editVenue }) => {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(venue.name);
   const [address, setAddress] = useState(venue.address);
   const [phone, setPhone] = useState(venue.phone);
 
+  if (!editing && venue.name === "") {
+    return (<div/>)
+  }
+
   const handleEdit = () => {
+    if (editing) {
+      const json = {
+        _id: venue._id,
+        name: name,
+        address: address,
+        phone: phone
+      }
+      editVenue(json);
+    }
     setEditing(!editing);
   };
 
@@ -30,9 +43,7 @@ const Venue = ({ venue, selectVenue, isVenueSelected }) => {
 
   return (
     <div className="hover box" style={{display: 'flex'}} onClick={() => selectVenue(venue)}>
-      {/* <p className="venue-id">{venue._id}</p> */}
       <div style={{flexGrow: "1"}}>
-       
       {editing ? (
         <>
           <IconInputText src={<NameIcon className="text-input-icon" />} placeholderText={"Name..."} text={name} handleInputChange={handleNameChange}/>
@@ -41,14 +52,14 @@ const Venue = ({ venue, selectVenue, isVenueSelected }) => {
         </>
       ) : (
         <>
-          <IconText src={<NameIcon className="svg" />} textClass={"main-text"} text={name}/>
-          <IconText src={<AddressIcon className="svg" />} textClass={"sub-text accent"} text={address}/>
-          <IconText src={<PhoneIcon className="svg" />} textClass={"sub-text accent"} text={phone}/>
+          <IconText src={<NameIcon className="svg" />} textClass={"main-text"} text={venue.name}/>
+          <IconText src={<AddressIcon className="svg" />} textClass={"sub-text accent"} text={venue.address}/>
+          <IconText src={<PhoneIcon className="svg" />} textClass={"sub-text accent"} text={venue.phone}/>
         </>
       )}
-      <button className='clickable hover' onClick={handleEdit}>{editing ? 'Save' : 'Edit'}</button>
+      <button className='clickable hover' onClick={handleEdit}>{(name === "" && editing) ? "Delete" : editing ? 'Save' : 'Edit'}</button>
       {editing &&
-        <a style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={handleEdit}>Cancel</a>
+        <a style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={() => { setEditing(false) }}>Cancel</a>
       }
       </div>
 
