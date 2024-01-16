@@ -61,6 +61,20 @@ a {
     padding: 12px;
 }
 
+.selected {
+  background-color: #7AB2E5;
+  color: #00284E;
+}
+
+.selected .accent {
+    color: #00284E; 
+}
+
+.selected .svg {
+    color: #00284E;
+    fill: #7AB2E5;
+}
+
 .box-content {
     display: flex;
     justify-content: space-between;

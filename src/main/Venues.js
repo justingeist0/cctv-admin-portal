@@ -1,12 +1,13 @@
 import React from 'react';
 import Venue from './Venue';
 
-function Venues({ selectVenue, venues, editVenue }) {
+function Venues({ selectVenue, selectedVenue, venues, editVenue }) {
+    console.log(venues)
     return (
         <div className='container'>
             <h2>Venues</h2>
             {venues.map(venue => (
-                <Venue key={venue._id} venue={venue} selectVenue={selectVenue} isVenueSelected={true} editVenue={editVenue}/>
+                <Venue key={venue._id} venue={venue} selectVenue={selectVenue} isVenueSelected={selectedVenue !== null && selectedVenue._id === venue._id} editVenue={editVenue}/>
             ))}
         </div>
     );

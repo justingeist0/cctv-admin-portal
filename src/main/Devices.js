@@ -4,7 +4,9 @@ import Device from './Device';
 import IconInputText from './view/IconInputText';
 import { ReactComponent as Info } from './svg/info.svg';
 
-function Devices({ venue, selectDevice }) {
+const cache = {}
+
+function Devices({ venue, selectDevice, deviceState, setDeviceState }) {
     const [devices, setDevices] = useState([]);
     const [isAddDevice, setIsAddDevice] = useState(false);
     const [name, setName] = useState("");
@@ -12,10 +14,30 @@ function Devices({ venue, selectDevice }) {
     const [remoteLink, setRemoteLink] = useState("");
     const { getToken } = useAuth();
 
+    const randomPassword = function() {
+      const phrases = [
+        "apples", "bananas", "cool", "the", "elephant", "fancy", "gorilla",
+        "horses", "igloo", "jelly", "kangaroo", "lollipop", "monkey", "noodle",
+        "octopus", "penguin", "quilt", "rainbow", "snake", "tiger", "umbrella",
+        "vampire", "watermelon", "yoyo", "zebra", "brown", "yellow", "green",
+        "red", "blue", "pink", "purple", 'zoo', 'dog', 'cat', 'mouse', 'bird'
+      ];
+      const randomWords = [];
+      for (let i = 0; i < 3; i++) {
+        randomWords.push(phrases[Math.floor(Math.random() * phrases.length)]);
+      }
+      const randomNumber = Math.floor(Math.random() * 100);
+      const newPassword = [...randomWords, randomNumber].join(' ');
+      setPassword(newPassword);
+    }
+
     useEffect(() => {
       setDevices([]);
       if (venue)
         setTimeout(async () => {
+            if (cache[venue._id]) {
+              setDevices(cache[venue._id]);
+          }
             const token = await getToken();
             await updateDeviceDropDown(token, venue._id, setDevices);
         })
@@ -81,22 +103,25 @@ function Devices({ venue, selectDevice }) {
               <button className='clickable hover' style={{marginTop: "6px"}} onClick={() => { setIsAddDevice(true) }}>Add Device</button>
             }
             {venue && isAddDevice &&
-                <div>
+              <div>
                 <br/>
-                  <h4>Device Name:</h4>
-                  <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Description..."} text={name} handleInputChange={(e) => { setName(e.target.value) }}/>
+                <h4>Device Name:</h4>
+                <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Description..."} text={name} handleInputChange={(e) => { setName(e.target.value) }}/>
+                <div style={{display: 'flex', alignItems: 'center'}}>
                   <h4>Device Password:</h4>
-                  <IconInputText src={<Info className="text-input-icon" />} placeholderText={"PC Password..."} text={password} handleInputChange={(e) =>{ setPassword(e.target.value) }}/>
-                  <h4>Remote Connection Link:</h4>
-                  <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Getscreen.me link..."} text={remoteLink} handleInputChange={(e) =>{ setRemoteLink(e.target.value) }}/>
-                  <button className='clickable hover' style={{marginTop: "6px"}} onClick={addDevice}>Add Device</button>
-                  <p className='hover' style={{marginLeft: "12px"}} onClick={() => { setIsAddDevice(false) }}>Cancel</p>
-                  <br/>
-                  <br/>
+                  <button className='clickable hover' onClick={randomPassword}>Create Random Password</button>
+                </div>
+                <IconInputText src={<Info className="text-input-icon" />} placeholderText={"PC Password..."} text={password} handleInputChange={(e) =>{ setPassword(e.target.value) }}/>
+                <h4>Remote Connection Link:</h4>
+                <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Getscreen.me link..."} text={remoteLink} handleInputChange={(e) =>{ setRemoteLink(e.target.value) }}/>
+                <button className='clickable hover' style={{marginTop: "6px"}} onClick={addDevice}>Add Device</button>
+                <p className='hover' style={{marginLeft: "12px"}} onClick={() => { setIsAddDevice(false) }}>Cancel</p>
+                <br/>
+                <br/>
               </div>
             }
             {devices.map(device => (
-                <Device key={device._id} device={device} selectDevice={selectDevice} />
+                <Device key={device._id} device={device} selectDevice={selectDevice} deviceState={deviceState} setDeviceState={setDeviceState} />
             ))}
         </div>
     );
@@ -110,7 +135,7 @@ async function updateDeviceDropDown(token, clientId, setDevices) {
   })
   .then(response => response.json())
   .then(data => {
-      console.log(data)
+      cache[clientId] = data;
       setDevices(data);
   })
   .catch(error => {

@@ -10,8 +10,8 @@ import { useAuth } from '../AuthContext';
 const Content = () => {
     const [venues, setVenues] = useState([]);
     const [venue, setVenue] = useState(null);
-    //const [device, setDevice] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [deviceState, setDeviceState] = useState({});
     const { getToken } = useAuth();
 
     useEffect(() => {
@@ -23,14 +23,12 @@ const Content = () => {
 
     const editVenue = async (venue) => {  
         const token = await getToken();
-        console.log(venue)
         updateVenue(token, venue, () => {
             const newVenues = venues.map(v => {
                 if (v._id === venue._id)
                     return venue;
                 return v;
             });
-            console.log("Success")
             setVenues(newVenues);
         });
     }
@@ -40,14 +38,13 @@ const Content = () => {
             <div className="column">
                 <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
                 <AddVenue addVenue={(v) => {
-                    console.log(venue)
                     const newVenues = [v, ...venues];
                     setVenues(newVenues);
                 }}/>
-                <Venues selectVenue={setVenue} venues={venues} editVenue={editVenue}/>
+                <Venues selectVenue={setVenue} selectedVenue={venue} venues={venues} editVenue={editVenue}/>
             </div>
             <div className="column-wide">
-                <Devices venue={venue} selectDevice={() => {}} />
+                <Devices venue={venue} selectDevice={() => {}} deviceState={deviceState} setDeviceState={setDeviceState} />
             </div>
         </div>
     );

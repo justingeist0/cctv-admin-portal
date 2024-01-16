@@ -61,10 +61,6 @@ const addVenueRequest = (name, address, phone, getToken, addVenue, close) => {
     alert("Please enter a name for the venue.");
     return;
   }
-  if (address === "") {
-    alert("Please enter an address for the venue.");
-    return;
-  }
   const data = {
     name: name,
     address: address,

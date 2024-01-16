@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Device.css';
 import IconInputText from './view/IconInputText';
 import { ReactComponent as Chevron } from './svg/chevron.svg';
@@ -15,19 +15,40 @@ import { useAuth } from '../AuthContext';
 
 let isFetching = false
 
-const Device = ({ device, selectDevice }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isAddImage, setIsAddImage] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
-  const [showAds, setShowAds] = useState(true);
-  const [name, setName] = useState(device.name);
-  const [password, setPassword] = useState(device.password);
-  const [remoteLink, setRemoteLink] = useState(device.remoteLink);
-  const [adUrls, setAdUrls] = useState(device.images || []);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [addAdUrl, setAddAdUrl] = useState("");
+const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
+  const deviceSettings = deviceState[device._id] || {};
+  const [isExpanded, setIsExpanded] = useState(deviceSettings.isExpanded !== undefined ? deviceSettings.isExpanded : false);
+  const [isAddImage, setIsAddImage] = useState(deviceSettings.isAddImage !== undefined ? deviceSettings.isAddImage : true);
+  const [showInfo, setShowInfo] = useState(deviceSettings.showInfo !== undefined ? deviceSettings.showInfo : true);
+  const [showAds, setShowAds] = useState(deviceSettings.showAds !== undefined ? deviceSettings.showAds : true);
+  const [name, setName] = useState(deviceSettings.name !== undefined ? deviceSettings.name : device.name);
+  const [password, setPassword] = useState(deviceSettings.password !== undefined ? deviceSettings.password : device.password);
+  const [remoteLink, setRemoteLink] = useState(deviceSettings.remoteLink !== undefined ? deviceSettings.remoteLink : device.remoteLink);
+  const [adUrls, setAdUrls] = useState(deviceSettings.images !== undefined ? deviceSettings.images : (device.images || []));
+  const [statusMessage, setStatusMessage] = useState(deviceSettings.statusMessage !== undefined ? deviceSettings.statusMessage : "");
+  const [addAdUrl, setAddAdUrl] = useState(deviceSettings.addAdUrl !== undefined ? deviceSettings.addAdUrl : "");
+
   const [deleted, setDeleted] = useState(false);
   const { getToken } = useAuth();
+
+  useEffect(() => {
+    return () => {
+      const updatedDeviceState = {
+        isExpanded: isExpanded,
+        isAddImage: isAddImage,
+        showInfo: showInfo,
+        showAds: showAds,
+        name: name,
+        password: password,
+        remoteLink: remoteLink,
+        images: adUrls,
+        statusMessage: statusMessage,
+        addAdUrl: addAdUrl
+      }
+      deviceState[device._id] = updatedDeviceState;
+      setDeviceState(deviceState);
+    };
+  }, [isExpanded, isAddImage, showInfo, showAds, name, password, remoteLink, adUrls, statusMessage, addAdUrl, device._id, deviceState, setDeviceState]);
 
   let mStartIdx = -1;
   let mEndIdx = -1;
@@ -96,7 +117,6 @@ const Device = ({ device, selectDevice }) => {
     device['name'] = name;
     device['password'] = password;
     device['remoteLink'] = remoteLink;
-
     fetch(process.env.REACT_APP_API_URL + `/devices/${device._id}`, {
       method: 'PUT',
       headers: {
@@ -142,14 +162,21 @@ const Device = ({ device, selectDevice }) => {
         <div className='device-header' style={{marginTop: '12px'}}>
           <div className='device-header'>
             <Ad className={showAds ? 'device-tab-button-selected' : 'device-tab-button'} onClick={() => { setShowAds(!showAds) }}/>
-            <Info className={showInfo ? 'device-tab-button-selected' : 'device-tab-button'} onClick={() => { setShowInfo(!showInfo) }}/>
             <AddImage className={isAddImage ? 'device-tab-button-selected' : 'device-tab-button'} onClick={() => { setIsAddImage(!isAddImage) }}/>
+            <Info className={showInfo ? 'device-tab-button-selected' : 'device-tab-button'} onClick={() => { setShowInfo(!showInfo) }}/>
             <p style={{marginLeft: "12px"}}>{statusMessage}</p>
           </div>
           <div>
             <button className='clickable hover' onClick={undo}>Undo All</button>
             <button className='clickable hover' style={{marginLeft: "12px"}} onClick={saveAll}>{name === "" ? "Delete" : "Save Changes"}</button>
           </div>
+        </div>
+      )}
+      {isExpanded && showAds && (
+        <div className='image-container'>
+          {adUrls.map((img, index) => (
+            <ImageComponent key={index} index={index} handleDragEnd={handleDragEnd} handleDragStart={handleDragStart} handleDragOver={handleDragOver} img={img} deleteAd={deleteAd} copyAd={copyAd}/>
+          ))}
         </div>
       )}
       {isExpanded && isAddImage && (
@@ -160,7 +187,6 @@ const Device = ({ device, selectDevice }) => {
           <br/>
           <br/>
           <button className='clickable hover' onClick={() => { addAd() }}>Add Ad</button>
-          <p style={{marginLeft: '12px', fontSize: '12px'}} className='hover' onClick={() => { setIsAddImage(false) }}>Cancel</p>
         </div>
       )}
       {isExpanded && showInfo && (
@@ -173,14 +199,22 @@ const Device = ({ device, selectDevice }) => {
           <h4>Remote Connection Link:</h4>
           <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={remoteLink} handleInputChange={(e) =>{ setRemoteLink(e.target.value) }}/>
           <h4>OBS Website Link:</h4>
-          <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={`https://cc-tv.onrender.com/obs?deviceId=${device._id}`} handleInputChange={(e) =>{ }}/>
-        </div>
-      )}
-      {isExpanded && showAds && (
-        <div className='image-container'>
-          {adUrls.map((img, index) => (
-            <ImageComponent key={index} index={index} handleDragEnd={handleDragEnd} handleDragStart={handleDragStart} handleDragOver={handleDragOver} img={img} deleteAd={deleteAd} copyAd={copyAd}/>
-          ))}
+          <div className='cursor-pointer' onClick={async () => {
+              if (typeof window !== 'undefined') {
+                  const newClipItem = new ClipboardItem({
+                      "text/plain": new Blob([`https://cc-tv.onrender.com/obs?deviceId=${device._id}`], {type: "text/plain"})
+                  });
+                  await navigator.clipboard.write([newClipItem]);
+                  alert("Copied OBS Link to Clipboard")
+              }
+            }}>
+            <IconInputText 
+              src={<Info className="text-input-icon" />} 
+              placeholderText={"Device Name..."} 
+              text={`https://cc-tv.onrender.com/obs?deviceId=${device._id}`} 
+              handleInputChange={(e) =>{ }}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -230,4 +264,3 @@ function ImageComponent({index, handleDragEnd, handleDragStart, handleDragOver, 
       </div>}
   </div>;
 }
-

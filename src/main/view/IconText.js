@@ -2,7 +2,9 @@ import React from 'react';
 import './IconText.css';
 
 const IconText = ({src, text, textClass}) => {
-  const mText = text || 'Not provided';
+  if (text === null || text.length === 0)
+    return (<></>)
+  const mText = text ? text : "Not Provided"
   return (
     <div className='text-container'>    
         {src}

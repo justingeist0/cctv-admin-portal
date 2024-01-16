@@ -42,7 +42,7 @@ const Venue = ({ venue, selectVenue, isVenueSelected, editVenue }) => {
   };
 
   return (
-    <div className="hover box" style={{display: 'flex'}} onClick={() => selectVenue(venue)}>
+    <div className={isVenueSelected ? "selected box" : "hover box"} style={{display: 'flex'}} onClick={() => selectVenue(venue)}>
       <div style={{flexGrow: "1"}}>
       {editing ? (
         <>
