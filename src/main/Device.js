@@ -27,6 +27,8 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
   const [adUrls, setAdUrls] = useState(deviceSettings.images !== undefined ? deviceSettings.images : (device.images || []));
   const [statusMessage, setStatusMessage] = useState(deviceSettings.statusMessage !== undefined ? deviceSettings.statusMessage : "");
   const [addAdUrl, setAddAdUrl] = useState(deviceSettings.addAdUrl !== undefined ? deviceSettings.addAdUrl : "");
+  const [isMirroringDevice, setIsMirroringDevice] = useState(deviceSettings.isMirror !== undefined ? deviceSettings.isMirror : device.mirrorDeviceId !== undefined);
+  const [mirrorDeviceId, setMirrorDeviceId] = useState(deviceSettings.mirrorDeviceId !== undefined ? deviceSettings.mirrorDeviceId : device.mirrorDeviceId !== undefined ? device.mirrorDeviceId : "");
 
   const [deleted, setDeleted] = useState(false);
   const { getToken } = useAuth();
@@ -43,12 +45,14 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
         remoteLink: remoteLink,
         images: adUrls,
         statusMessage: statusMessage,
-        addAdUrl: addAdUrl
+        addAdUrl: addAdUrl,
+        isMirror: isMirroringDevice,
+        mirrorDeviceId: mirrorDeviceId
       }
       deviceState[device._id] = updatedDeviceState;
       setDeviceState(deviceState);
     };
-  }, [isExpanded, isAddImage, showInfo, showAds, name, password, remoteLink, adUrls, statusMessage, addAdUrl, device._id, deviceState, setDeviceState]);
+  }, [isExpanded, isAddImage, showInfo, showAds, name, password, remoteLink, adUrls, statusMessage, addAdUrl, device._id, deviceState, setDeviceState, isMirroringDevice, mirrorDeviceId]);
 
   let mStartIdx = -1;
   let mEndIdx = -1;
@@ -95,6 +99,11 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
     setAddAdUrl(e.target.value);
   }
 
+
+  const handleMirrorInput = (e) => {
+    setMirrorDeviceId(e.target.value);
+  }
+
   const addAd = () => {
     const text = addAdUrl
     if (`${text}`.length > 0) {
@@ -117,6 +126,7 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
     device['name'] = name;
     device['password'] = password;
     device['remoteLink'] = remoteLink;
+    device['mirrorDeviceId'] = isMirroringDevice ? mirrorDeviceId : undefined;
     fetch(process.env.REACT_APP_API_URL + `/devices/${device._id}`, {
       method: 'PUT',
       headers: {
@@ -172,7 +182,7 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
           </div>
         </div>
       )}
-      {isExpanded && showAds && (
+      {isExpanded && showAds && (!isMirroringDevice || `${device._id}` === `${mirrorDeviceId}`) && (
         <div className='image-container'>
           {adUrls.map((img, index) => (
             <ImageComponent key={index} index={index} handleDragEnd={handleDragEnd} handleDragStart={handleDragStart} handleDragOver={handleDragOver} img={img} deleteAd={deleteAd} copyAd={copyAd}/>
@@ -182,11 +192,29 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
       {isExpanded && isAddImage && (
         <div>
           <br/>
-          <IconInputText src={<AddImage className="text-input-icon" />} placeholderText={"Paste Ad Media URL or Copied Ad here..."} text={addAdUrl} handleInputChange={handleAddAdInput}/>
-          <a className='hover' href='https://console.firebase.google.com/u/0/project/adtv-64129/storage/adtv-64129.appspot.com/files' target='_blank' rel="noreferrer">Upload Ad Here and Copy the URL</a>
+          <div>
+            <label>
+              Sync Group
+              <input
+                type="checkbox"
+                checked={isMirroringDevice}
+                onChange={() => { setIsMirroringDevice(!isMirroringDevice) }}
+              />
+            </label>
+          </div>
           <br/>
-          <br/>
-          <button className='clickable hover' onClick={() => { addAd() }}>Add Ad</button>
+          {(!isMirroringDevice || `${device._id}` === `${mirrorDeviceId}`) && (
+            <div>
+                <IconInputText src={<AddImage className="text-input-icon" />} placeholderText={"Paste Ad Media URL or Copied Ad here..."} text={addAdUrl} handleInputChange={handleAddAdInput}/>
+                <a className='hover' href='https://console.firebase.google.com/u/0/project/adtv-64129/storage/adtv-64129.appspot.com/files' target='_blank' rel="noreferrer">Upload Ad Here and Copy the URL</a>
+                <br/>
+                <br/>
+                <button className='clickable hover' onClick={() => { addAd() }}>Add Ad</button>
+            </div>
+          )}
+          {isMirroringDevice && (
+             <IconInputText src={<AddImage className="text-input-icon" />} placeholderText={"Paste Device ID of what you want to sync. If this is host device paste this device's Device ID here."} text={mirrorDeviceId} handleInputChange={handleMirrorInput}/>
+          )}
         </div>
       )}
       {isExpanded && showInfo && (
@@ -198,6 +226,25 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
           <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={password} handleInputChange={(e) =>{ setPassword(e.target.value) }}/>
           <h4>Remote Connection Link:</h4>
           <IconInputText src={<Info className="text-input-icon" />} placeholderText={"Device Name..."} text={remoteLink} handleInputChange={(e) =>{ setRemoteLink(e.target.value) }}/>
+          
+          <h4>Device ID:</h4>
+          <div className='cursor-pointer' onClick={async () => {
+              if (typeof window !== 'undefined') {
+                  const newClipItem = new ClipboardItem({
+                      "text/plain": new Blob([`${device._id}`], {type: "text/plain"})
+                  });
+                  await navigator.clipboard.write([newClipItem]);
+                  alert("Copied Device ID to Clipboard")
+              }
+            }}>
+            <IconInputText 
+              src={<Info className="text-input-icon" />} 
+              placeholderText={""} 
+              text={`${device._id}`} 
+              handleInputChange={(e) =>{ }}
+            />
+          </div>
+
           <h4>OBS Website Link:</h4>
           <div className='cursor-pointer' onClick={async () => {
               if (typeof window !== 'undefined') {
@@ -210,7 +257,7 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
             }}>
             <IconInputText 
               src={<Info className="text-input-icon" />} 
-              placeholderText={"Device Name..."} 
+              placeholderText={""} 
               text={`https://cc-tv.onrender.com/obs?deviceId=${device._id}`} 
               handleInputChange={(e) =>{ }}
             />
@@ -221,7 +268,6 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
   )
 };
 
-export default Device;
 
 function ImageComponent({index, handleDragEnd, handleDragStart, handleDragOver, img, deleteAd, copyAd}) {
   const [isEditingDuration, setIsEditingDuration] = useState(false);
@@ -264,3 +310,5 @@ function ImageComponent({index, handleDragEnd, handleDragStart, handleDragOver, 
       </div>}
   </div>;
 }
+
+export default Device
