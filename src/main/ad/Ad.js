@@ -17,6 +17,10 @@ const Ad = () => {
   const [ctx, setCtx] = useState(null);
   const [canvas, setCanvas] = useState(null);
 
+  const [topFont, setTopFont] = useState(55);
+  const [bottomFont1, setBottomFont1] = useState(55);
+  const [bottomFont2, setBottomFont2] = useState(55);
+
   useEffect(() => {
     const mCanvas = document.getElementById("canvas");
     const mCtx = mCanvas.getContext("2d");
@@ -46,36 +50,53 @@ const Ad = () => {
 
   const resetCanvasToTransparent = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2);
+    drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2));
   }
 
   useEffect(() => {
     handleBackground(ctx, canvas, background, () => { 
-      drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2);
+      drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2));
     })
-  }, [url, logo, background, topRightText, bottomLeftText1, bottomLeftText2, canvas, ctx]);
+  }, [url, logo, background, topRightText, bottomLeftText1, bottomLeftText2, canvas, ctx, topFont, bottomFont1, bottomFont2]);
 
   return (
     <div className='ad'>
         <h2>Company Logo</h2>
-        <input type="file" accept="image/png" onChange={(e) => setLogo(URL.createObjectURL(e.target.files[0]))} /><br/>
+        <input type="file" accept="image/png" onChange={(e) => {
+            if (e.target.files.length > 0) {
+                setLogo(URL.createObjectURL(e.target.files[0]));
+            }
+        }} /><br/>
         <h2>Background Image or Video</h2>
-        <input type="file" accept="image/*,video/*" onChange={(e) => setBackground(URL.createObjectURL(e.target.files[0]))} /><br/>
+        <input type="file" accept="image/*,video/*" onChange={(e) => {
+            if (e.target.files.length > 0) {
+                setBackground(URL.createObjectURL(e.target.files[0]));
+            }
+        }} /><br/>
         <h2>Enter Company Website</h2>
-        <input type="text" placeholder="Website URL" value={url} onChange={(e) => setUrl(e.target.value)} /><br/>
+        <input type="text" placeholder="Website URL (https://www.....)" value={url} onChange={(e) => setUrl(e.target.value)} /><br/>
         <h2>Top Right Text</h2>
-        <input type="text" placeholder="Top right text" value={topRightText} onChange={(e) => setTopRightText(e.target.value)} /><br/>
+        <input type="text" placeholder="Top right text" value={topRightText} onChange={(e) => setTopRightText(e.target.value)} />
+        <input type="range" min="10" max="128" value={topFont} onChange={(e) => setTopFont(e.target.value)} />
+        <input type="number" min="10" max="128" value={topFont} onChange={(e) => setTopFont(e.target.value)} />
+        <br/>
         <h2>Bottom Text 1</h2>
-        <input type="text" placeholder="Bottom left top text" value={bottomLeftText1} onChange={(e) => setBottomLeftText1(e.target.value)} /><br/>
+        <input type="text" placeholder="Bottom left top text" value={bottomLeftText1} onChange={(e) => setBottomLeftText1(e.target.value)} />
+        <input type="range" min="10" max="128" value={bottomFont1} onChange={(e) => setBottomFont1(e.target.value)} />
+        <input type="number" min="10" max="128" value={bottomFont1} onChange={(e) => setBottomFont1(e.target.value)} />
+        <br/>
         <h2>Bottom Text 2</h2>
-        <input type="text" placeholder="Bottom left bottom text" value={bottomLeftText2} onChange={(e) => setBottomLeftText2(e.target.value)} /><br/>
+        <input type="text" placeholder="Bottom left bottom text" value={bottomLeftText2} onChange={(e) => setBottomLeftText2(e.target.value)} />
+        <input type="range" min="10" max="128" value={bottomFont2} onChange={(e) => setBottomFont2(e.target.value)} />
+        <input type="number" min="10" max="128" value={bottomFont2} onChange={(e) => setBottomFont2(e.target.value)} />
+        <br/>
         <div>
           <h1>Preview</h1>
           <button onClick={() => downloadCanvas(resetCanvasToTransparent)}>Download Image</button>
         </div>
-          <canvas id="canvas" width="1920" height="1080">
-            Your browser does not support the canvas element.
-          </canvas>
+        <canvas id="canvas" width="1920" height="1080">
+          Your browser does not support the canvas element.
+        </canvas>
     </div>
   );
 };
@@ -170,7 +191,7 @@ function clearScreen(ctx, canvas) {
   }
 }
 
-function drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2) {
+function drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2, topFont, bottomFont1, bottomFont2) {
     const qrCodeSize = 280;
     const isValidUrl = url.startsWith('http://') || url.startsWith('https://');
     if (isValidUrl)
@@ -184,7 +205,6 @@ function drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bott
             ctx.drawImage(qrCanvas, x, y, qrCodeSize, qrCodeSize);
         });
 
-        const fontSize = 55;
         const rectWidth = 1628;
         const rectHeight = 912;
         const canvasWidth = 1920;
@@ -193,7 +213,6 @@ function drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bott
         // Calculate the center position of the white space
         const textX = 30//(canvasWidth - rectWidth) / 2 + rectWidth / 2;
         const textY = rectHeight + (canvasHeight - rectHeight) / 2;
-        ctx.font = `${fontSize}px Roboto`;
         ctx.fontWeight = 'bold';
         ctx.fillStyle = "black";
         ctx.strokeStyle = "black";
@@ -203,12 +222,16 @@ function drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bott
         ctx.textBaseline = "middle";
         
         if (bottomLeftText1 && bottomLeftText2) {
-            drawTextWithStroke(ctx, bottomLeftText1, textX, textY - fontSize / 2, fontSize);
-            drawTextWithStroke(ctx, bottomLeftText2, textX, textY + fontSize / 2, fontSize);
+          const totalHeight = bottomFont1 + bottomFont2;
+          const textY1 = textY - totalHeight / 4;
+          const textY2 = textY + totalHeight / 4;
+
+          drawTextWithStroke(ctx, bottomLeftText1, textX, textY1, bottomFont1);
+          drawTextWithStroke(ctx, bottomLeftText2, textX, textY2, bottomFont2);
         } else if (bottomLeftText1) {
-          drawTextWithStroke(ctx, bottomLeftText1, textX, textY, fontSize);
+          drawTextWithStroke(ctx, bottomLeftText1, textX, textY, bottomFont1, bottomFont1);
         } else if (bottomLeftText2) {
-          drawTextWithStroke(ctx, bottomLeftText2, textX, textY, fontSize);
+          drawTextWithStroke(ctx, bottomLeftText2, textX, textY, bottomFont2, bottomFont2);
         }
 
         const words = topRightText.split(' ');
@@ -217,14 +240,17 @@ function drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bott
         const maxWidth = canvasWidth - rectWidth - 2 * padding; // Maximum width of the text
 
         let line = '';
+        let fontSize = parseInt(topFont);
         let y = padding + fontSize/2;
+
+        ctx.font = `${fontSize}px Roboto`;
 
         for (let n = 0; n < words.length; n++) {
           const testLine = line + words[n] + ' ';
           const metrics = ctx.measureText(testLine);
           const testWidth = metrics.width;
           if (testWidth > maxWidth && n > 0) {
-            drawTextWithStroke(ctx, line, rectWidth + padding, y, fontSize);
+            drawTextWithStroke(ctx, line, rectWidth + padding, y, topFont);
             line = words[n] + ' ';
             y += fontSize;
           }
@@ -232,7 +258,7 @@ function drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bott
             line = testLine;
           }
         }
-        drawTextWithStroke(ctx, line, rectWidth + padding, y, fontSize);
+        drawTextWithStroke(ctx, line, rectWidth + padding, y, topFont);
 
         if (logo) {
           if (logoImage.src === logo) {
@@ -258,7 +284,6 @@ function drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bott
           }
       }
       ctx.drawImage(loadedTvImage, 0, 0, 1628, 912);
-
 }
 
 function drawTextWithStroke(ctx, text, x, y, fontSize) {
