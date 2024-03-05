@@ -1,0 +1,39 @@
+.ad {
+  position: relative;
+  background-color: #0B4275;
+  color: white;
+  font-weight: bold;
+}
+
+.ad h2 {
+  margin-top: 12px;
+}
+
+.ad div {
+  margin-left: 12px;
+}
+
+.ad canvas {
+  position: absolute;
+  left: 0;
+  background-color: #0B4275;
+  color: white;
+}
+
+.ad h1, .ad button {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.ad h1 {
+  font-size: 24px;
+}
+
+.ad button {
+  padding: 10px 20px;
+  font-size: 18px;
+}
+
+.ad input {
+  padding: 4px;
+}

@@ -7,6 +7,8 @@ import SearchBar from './SearchBar';
 import AddVenue from './AddVenue';
 import { useAuth } from '../AuthContext';
 
+import '../App.css';
+
 const Content = () => {
     const [venues, setVenues] = useState([]);
     const [venue, setVenue] = useState(null);

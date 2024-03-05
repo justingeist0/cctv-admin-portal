@@ -1,12 +1,18 @@
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import Content from './main/Content';
+import Ad from './main/ad/Ad';
 
 function App() {
   return (
-    <AuthProvider>
-      <Content/>
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Content />} />
+          <Route path="/create-ad" element={<Ad />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }
 
