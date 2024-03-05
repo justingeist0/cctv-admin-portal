@@ -41,6 +41,11 @@ export function AuthProvider({ children }) {
         getToken
     }
 
+    const okPath = "/create-ad"
+    if (window.location.pathname === okPath) {
+        return (children)
+    }
+
     return (
         <AuthContext.Provider value={value}>
             {
