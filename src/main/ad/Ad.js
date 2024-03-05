@@ -44,18 +44,16 @@ const Ad = () => {
     mCtx.drawImage(loadedTvImage, 0, 0, 1628,912);
   }, [ctx, canvas]);
 
-  const drawOverlayHelper = () => { 
+  const resetCanvasToTransparent = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2);
   }
 
-  const resetCanvasToTransparent = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawOverlayHelper();
-  }
-
   useEffect(() => {
-    handleBackground(ctx, canvas, background, drawOverlayHelper)
-  }, [url, logo, background, topRightText, bottomLeftText1, bottomLeftText2]);
+    handleBackground(ctx, canvas, background, () => { 
+      drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2);
+    })
+  }, [url, logo, background, topRightText, bottomLeftText1, bottomLeftText2, canvas, ctx]);
 
   return (
     <div className='ad'>
@@ -102,12 +100,12 @@ function handleBackground(ctx, canvas, background, drawOverlayHelper) {
 
         prevBackground = background;
 
-        if (isBackgroundAnImage == null) {
+        if (isBackgroundAnImage === null) {
           alert("It seems this file is not an image or video. If you believe this is a mistake please contact me.")
           return
         }
 
-        if (isBackgroundAnImage == true) {
+        if (isBackgroundAnImage === true) {
           backgroundImage.onload = function() {
 
           clearScreen(ctx, canvas);
@@ -116,7 +114,7 @@ function handleBackground(ctx, canvas, background, drawOverlayHelper) {
           backgroundImage.src = background;
         } 
         
-        if (isBackgroundAnImage == false) {
+        if (isBackgroundAnImage === false) {
           backgroundVideo.onloadedmetadata = null
           backgroundVideo.src = background;
           backgroundVideo.muted = true;
@@ -292,9 +290,9 @@ async function isAnImage(blobUrl) {
 }
 
 function downloadCanvas(reset) {
-  if (isBackgroundAnImage == true)
+  if (isBackgroundAnImage === true)
     downloadCanvasAsImage();
-  else if (isBackgroundAnImage == false)
+  else if (isBackgroundAnImage === false)
     downloadCanvasAsImage();
   else {
     reset()
@@ -314,45 +312,45 @@ function downloadCanvasAsImage() {
   document.body.removeChild(link);
 }
 
-let recordedChunks = [];
+//let recordedChunks = [];
 
-function startRecording(streamDuration = 5000) { // streamDuration in milliseconds
-  let canvas = document.getElementById('canvas');
-    var stream = canvas.captureStream(); // Capture the stream from the canvas
-    var options = { mimeType: "video/webm; codecs=vp9" }; // Specify the WebM format
-    var mediaRecorder = new MediaRecorder(stream, options);
+// function startRecording(streamDuration = 5000) { // streamDuration in milliseconds
+//   let canvas = document.getElementById('canvas');
+//     var stream = canvas.captureStream(); // Capture the stream from the canvas
+//     var options = { mimeType: "video/webm; codecs=vp9" }; // Specify the WebM format
+//     var mediaRecorder = new MediaRecorder(stream, options);
 
-    mediaRecorder.ondataavailable = function(e) {
-        if (e.data.size > 0) {
-            recordedChunks.push(e.data);
-        }
-    };
+//     mediaRecorder.ondataavailable = function(e) {
+//         if (e.data.size > 0) {
+//             recordedChunks.push(e.data);
+//         }
+//     };
 
-    mediaRecorder.onstop = function() {
-        var blob = new Blob(recordedChunks, {
-            type: "video/webm"
-        });
+//     mediaRecorder.onstop = function() {
+//         var blob = new Blob(recordedChunks, {
+//             type: "video/webm"
+//         });
 
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        document.body.appendChild(a);
-        a.style = 'display: none';
-        a.href = url;
-        a.download = 'canvas-recording.webm'; // Change the file extension to .webm
-        a.click();
+//         var url = URL.createObjectURL(blob);
+//         var a = document.createElement('a');
+//         document.body.appendChild(a);
+//         a.style = 'display: none';
+//         a.href = url;
+//         a.download = 'canvas-recording.webm'; // Change the file extension to .webm
+//         a.click();
 
-        // Cleanup
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        recordedChunks = [];
-    };
+//         // Cleanup
+//         window.URL.revokeObjectURL(url);
+//         document.body.removeChild(a);
+//         recordedChunks = [];
+//     };
 
-    mediaRecorder.start();
-    // Stop recording after a specific duration
-    setTimeout(() => {
-        mediaRecorder.stop();
-    }, streamDuration);
-}
+//     mediaRecorder.start();
+//     // Stop recording after a specific duration
+//     setTimeout(() => {
+//         mediaRecorder.stop();
+//     }, streamDuration);
+// }
 
 
 export default Ad;
