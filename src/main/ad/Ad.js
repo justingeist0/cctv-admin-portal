@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Ad.css';
-import QRCode from 'qrcode';
+// import QRCode from 'qrcode';
 
 const loadedTvImage = new Image();
 loadedTvImage.src = '/linklocalplaceholderblack.png';
@@ -295,17 +295,17 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
     
 }
 
-function createQRcodeImage(url, qrCodeSize, canvas, ctx) {
-  QRCode.toCanvas(url, { width: qrCodeSize, margin: 1 }, (err, qrCanvas) => {
-    if (err) throw err;
+// function createQRcodeImage(url, qrCodeSize, canvas, ctx) {
+//   QRCode.toCanvas(url, { width: qrCodeSize, margin: 1 }, (err, qrCanvas) => {
+//     if (err) throw err;
 
-    // Calculate position for QR code to be at the bottom right
-    const x = canvas.width - qrCodeSize - 5;
-    const y = canvas.height - qrCodeSize - 5;
+//     // Calculate position for QR code to be at the bottom right
+//     const x = canvas.width - qrCodeSize - 5;
+//     const y = canvas.height - qrCodeSize - 5;
 
-    ctx.drawImage(qrCanvas, x, y, qrCodeSize, qrCodeSize);
-  });
-}
+//     ctx.drawImage(qrCanvas, x, y, qrCodeSize, qrCodeSize);
+//   });
+// }
 
 function drawQRCodeImage(qrImagePath, imageElement, qrCodeSize, canvas, ctx, height) {
   console.log('draw')
