@@ -3,17 +3,17 @@ import './Ad.css';
 import QRCode from 'qrcode';
 
 const loadedTvImage = new Image();
-loadedTvImage.src = '/placerholder3.png';
+loadedTvImage.src = '/linklocalplaceholderblack.png';
 
 var actualCallbackToUse = null;
 
 const Ad = () => {
   const [logo, setLogo] = useState('');
-  const [url, setUrl] = useState('');
   const [background, setBackground] = useState('');
   const [topRightText, setTopRightText] = useState('');
   const [bottomLeftText1, setBottomLeftText1] = useState('');
   const [bottomLeftText2, setBottomLeftText2] = useState('');
+  const [qrCode, setQrCode] = useState('');
   const [ctx, setCtx] = useState(null);
   const [canvas, setCanvas] = useState(null);
 
@@ -32,7 +32,7 @@ const Ad = () => {
       mCanvas.style.height = window.innerWidth / 2 / aspectRatio + 'px';
     }
   
-    window.addEventListener('resize', resizeCanvas);
+    //window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
   
     const width = 1920; // Width of the canvas
@@ -50,19 +50,19 @@ const Ad = () => {
 
   const resetCanvasToTransparent = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2));
+    drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2));
   }
 
   useEffect(() => {
     handleBackground(ctx, canvas, background, () => { 
-      drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2));
+      drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2));
     })
-  }, [url, logo, background, topRightText, bottomLeftText1, bottomLeftText2, canvas, ctx, topFont, bottomFont1, bottomFont2]);
+  }, [qrCode, logo, background, topRightText, bottomLeftText1, bottomLeftText2, canvas, ctx, topFont, bottomFont1, bottomFont2]);
 
   return (
     <div className='ad'>
-        <h2>Company Logo</h2>
-        <input type="file" accept="image/png" onChange={(e) => {
+        <h2>Company Logo (Image above barcode)</h2>
+        <input type="file" accept="image/*" onChange={(e) => {
             if (e.target.files.length > 0) {
                 setLogo(URL.createObjectURL(e.target.files[0]));
             }
@@ -74,7 +74,11 @@ const Ad = () => {
             }
         }} /><br/>
         <h2>Enter Company Website</h2>
-        <input type="text" placeholder="Website URL (https://www.....)" value={url} onChange={(e) => setUrl(e.target.value)} /><br/>
+        <input type="file" accept="image/*" onChange={(e) => {
+            if (e.target.files.length > 0) {
+                setQrCode(URL.createObjectURL(e.target.files[0]));
+            }
+        }} /><br/>
         <h2>Top Right Text</h2>
         <input type="text" placeholder="Top right text" value={topRightText} onChange={(e) => setTopRightText(e.target.value)} />
         <input type="range" min="10" max="128" value={topFont} onChange={(e) => setTopFont(e.target.value)} />
@@ -104,6 +108,7 @@ const Ad = () => {
 const logoImage = new Image();
 const backgroundImage = new Image();
 const backgroundVideo = document.createElement('video');
+const qrImage = new Image();
 let prevBackground;
 let isBackgroundAnImage;
 
@@ -191,115 +196,151 @@ function clearScreen(ctx, canvas) {
   }
 }
 
-function drawOverlay(ctx, canvas, url, logo, topRightText, bottomLeftText1, bottomLeftText2, topFont, bottomFont1, bottomFont2) {
-    const qrCodeSize = 280;
-    const isValidUrl = url.startsWith('http://') || url.startsWith('https://');
-    if (isValidUrl)
-        QRCode.toCanvas(url, { width: qrCodeSize, margin: 1 }, (err, qrCanvas) => {
-            if (err) throw err;
+function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, topFont, bottomFont1, bottomFont2) {
+  const qrCodeSize = 280;
+  const rectWidth = 1628;
+  const rectHeight = 912;
+  const canvasWidth = 1920;
+  const canvasHeight = 1080;
 
-            // Calculate position for QR code to be at the bottom right
-            const x = canvas.width - qrCodeSize - 5;
-            const y = canvas.height - qrCodeSize - 5;
+  // Calculate the center position of the white space
+  const textX = 30//(canvasWidth - rectWidth) / 2 + rectWidth / 2;
+  const textY = rectHeight + (canvasHeight - rectHeight) / 2;
+  ctx.fontWeight = 'bold';
+  ctx.fillStyle = "black";
+  ctx.strokeStyle = "black";
+  ctx.fontWeight = '900';
+  ctx.lineWidth = 3;
+  // ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
 
-            ctx.drawImage(qrCanvas, x, y, qrCodeSize, qrCodeSize);
-        });
+  
+  if (bottomLeftText1 && bottomLeftText2) {
+    const totalHeight = bottomFont1 + bottomFont2;
+    const textY1 = textY - totalHeight / 4;
+    const textY2 = textY + totalHeight / 4;
 
-        const rectWidth = 1628;
-        const rectHeight = 912;
-        const canvasWidth = 1920;
-        const canvasHeight = 1080;
-        
-        // Calculate the center position of the white space
-        const textX = 30//(canvasWidth - rectWidth) / 2 + rectWidth / 2;
-        const textY = rectHeight + (canvasHeight - rectHeight) / 2;
-        ctx.fontWeight = 'bold';
-        ctx.fillStyle = "black";
-        ctx.strokeStyle = "black";
-        ctx.fontWeight = '900';
-        ctx.lineWidth = 3;
-        // ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        
-        if (bottomLeftText1 && bottomLeftText2) {
-          const totalHeight = bottomFont1 + bottomFont2;
-          const textY1 = textY - totalHeight / 4;
-          const textY2 = textY + totalHeight / 4;
+    drawTextWithStroke(ctx, bottomLeftText1, textX, textY1, bottomFont1);
+    drawTextWithStroke(ctx, bottomLeftText2, textX, textY2, bottomFont2);
+  } else if (bottomLeftText1) {
+    drawTextWithStroke(ctx, bottomLeftText1, textX, textY, bottomFont1, bottomFont1);
+  } else if (bottomLeftText2) {
+    drawTextWithStroke(ctx, bottomLeftText2, textX, textY, bottomFont2, bottomFont2);
+  }
 
-          drawTextWithStroke(ctx, bottomLeftText1, textX, textY1, bottomFont1);
-          drawTextWithStroke(ctx, bottomLeftText2, textX, textY2, bottomFont2);
-        } else if (bottomLeftText1) {
-          drawTextWithStroke(ctx, bottomLeftText1, textX, textY, bottomFont1, bottomFont1);
-        } else if (bottomLeftText2) {
-          drawTextWithStroke(ctx, bottomLeftText2, textX, textY, bottomFont2, bottomFont2);
-        }
+  const words = topRightText.split(' ');
 
-        const words = topRightText.split(' ');
+  const padding = 10; // Padding inside the box
+  const maxWidth = canvasWidth - rectWidth - 2 * padding; // Maximum width of the text
 
-        const padding = 10; // Padding inside the box
-        const maxWidth = canvasWidth - rectWidth - 2 * padding; // Maximum width of the text
+  let line = '';
+  let fontSize = parseInt(topFont);
+  let y = padding + fontSize/2;
+  if (logo) {
+    y += logoImage.height;
+  }
+  if (qrCode) {
+    y += qrCodeSize;
+  }
 
-        let line = '';
-        let fontSize = parseInt(topFont);
-        let y = padding + fontSize/2;
-
-        ctx.font = `${fontSize}px Roboto`;
-
-        for (let n = 0; n < words.length; n++) {
-          const testLine = line + words[n] + ' ';
-          const metrics = ctx.measureText(testLine);
-          const testWidth = metrics.width;
-          if (testWidth > maxWidth && n > 0) {
-            drawTextWithStroke(ctx, line, rectWidth + padding, y, topFont);
-            line = words[n] + ' ';
-            y += fontSize;
-          }
-          else {
-            line = testLine;
-          }
-        }
-        drawTextWithStroke(ctx, line, rectWidth + padding, y, topFont);
-
-        if (logo) {
-          if (logoImage.src === logo) {
-            // Calculate the height to maintain the aspect ratio
-            const height = qrCodeSize * (logoImage.height / logoImage.width);
-    
-            // Calculate the position for the logo to be directly above the QR code
-            const x = canvas.width - qrCodeSize - 5;
-            const y = canvas.height - qrCodeSize - height - 10; // Subtract an additional 10 for spacing
-            ctx.drawImage(logoImage, x, y, qrCodeSize, height);
-          } else {
-            logoImage.onload = function() {
-              // Calculate the height to maintain the aspect ratio
-              const height = qrCodeSize * (logoImage.height / logoImage.width);
-      
-              // Calculate the position for the logo to be directly above the QR code
-              const x = canvas.width - qrCodeSize - 5;
-              const y = canvas.height - qrCodeSize - height - 10; // Subtract an additional 10 for spacing
-      
-              ctx.drawImage(logoImage, x, y, qrCodeSize, height);
-            };
-            logoImage.src = logo;
-          }
-      }
-      ctx.drawImage(loadedTvImage, 0, 0, 1628, 912);
-}
-
-function drawTextWithStroke(ctx, text, x, y, fontSize) {
   ctx.font = `${fontSize}px Roboto`;
 
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    const testWidth = metrics.width;
+    if (testWidth > maxWidth && n > 0) {
+      drawTextWithStroke(ctx, line, rectWidth + padding, y, topFont);
+      line = words[n] + ' ';
+      y += fontSize;
+    }
+    else {
+      line = testLine;
+    }
+  }
+  drawTextWithStroke(ctx, line, rectWidth + padding, y, topFont);
 
+  //drwa black reactangle 
+  ctx.fillStyle = "black";
+  ctx.fillRect(rectWidth, 0, canvasWidth - rectWidth, logoImage.height + qrCodeSize);
+
+  if (logo) {
+    if (logoImage.src === logo) {
+      // Calculate the height to maintain the aspect ratio
+      const height = qrCodeSize * (logoImage.height / logoImage.width);
+
+      // Calculate the position for the logo to be directly above the QR code
+      const x = canvas.width - qrCodeSize - 5;
+      const y = 10//canvas.height - qrCodeSize - height - 10; // Subtract an additional 10 for spacing
+      ctx.drawImage(logoImage, x, y, qrCodeSize, height);
+    } else {
+      logoImage.onload = function() {
+        // Calculate the height to maintain the aspect ratio
+        const height = qrCodeSize * (logoImage.height / logoImage.width);
+
+        // Calculate the position for the logo to be directly above the QR code
+        const x = canvas.width - qrCodeSize - 5;
+        const y = 10//canvas.height - qrCodeSize - height - 10; // Subtract an additional 10 for spacing
+
+            ctx.drawImage(logoImage, x, y, qrCodeSize, height);
+          };
+          logoImage.src = logo;
+        }
+      drawQRCodeImage(qrCode, qrImage, qrCodeSize, canvas, ctx, logoImage.height);
+  } 
+  drawQRCodeImage(qrCode, qrImage, qrCodeSize, canvas, ctx);
+
+  ctx.drawImage(loadedTvImage, 0, 0, 1628, 912);
+
+    
+}
+
+function createQRcodeImage(url, qrCodeSize, canvas, ctx) {
+  QRCode.toCanvas(url, { width: qrCodeSize, margin: 1 }, (err, qrCanvas) => {
+    if (err) throw err;
+
+    // Calculate position for QR code to be at the bottom right
+    const x = canvas.width - qrCodeSize - 5;
+    const y = canvas.height - qrCodeSize - 5;
+
+    ctx.drawImage(qrCanvas, x, y, qrCodeSize, qrCodeSize);
+  });
+}
+
+function drawQRCodeImage(qrImagePath, imageElement, qrCodeSize, canvas, ctx, height) {
+  console.log('draw')
+  if (qrImagePath) {
+    const x = canvas.width - qrCodeSize - 5;
+    const y = height ? height : 0;
+    console.log('draw1')
+    if (imageElement.src !== qrImagePath) {
+      imageElement.onload = function () {
+        ctx.drawImage(imageElement, x, y, qrCodeSize, qrCodeSize);
+      };
+      console.log('draw2')
+      imageElement.src = qrImagePath;
+    } 
+    console.log('draw3')
+    ctx.drawImage(imageElement, x, y, qrCodeSize, qrCodeSize);
+  }
+}
+
+function drawTextWithStroke(ctx, text, x, y, fontSize) {  
+  ctx.font = `bold ${fontSize}px `;
   ctx.strokeStyle = 'white';
-  ctx.lineWidth = 6;
+  ctx.lineWidth = 12; // Increase the stroke width
+  ctx.shadowColor = "white"; // Set the shadow color
+  ctx.shadowBlur = 10; // Set the blur level for the shadow
+  ctx.shadowOffsetX = 3; // Set the horizontal distance of the shadow
+  ctx.shadowOffsetY = 3; // Set the vertical distance of the shadow
   ctx.strokeText(text, x, y);
   ctx.fillStyle = 'black';
   ctx.strokeStyle = 'black';
-  ctx.lineWidth = .5;
+  ctx.lineWidth = 1;
   ctx.fillText(text, x, y);
   ctx.strokeText(text, x, y);
 
-
+  //reset
 }
 
 async function isAnImage(blobUrl) {
