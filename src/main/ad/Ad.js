@@ -6,6 +6,7 @@ const loadedTvImage = new Image();
 loadedTvImage.src = '/linklocalplaceholderblack.png';
 
 var actualCallbackToUse = null;
+const font = "Helvetica"
 
 const Ad = () => {
   const [logo, setLogo] = useState('');
@@ -20,6 +21,7 @@ const Ad = () => {
   const [topFont, setTopFont] = useState(55);
   const [bottomFont1, setBottomFont1] = useState(55);
   const [bottomFont2, setBottomFont2] = useState(55);
+  const [bottomPadding, setBottomPadding] = useState(0);
 
   useEffect(() => {
     const mCanvas = document.getElementById("canvas");
@@ -50,14 +52,14 @@ const Ad = () => {
 
   const resetCanvasToTransparent = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2));
+    drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2), parseInt(bottomPadding));
   }
 
   useEffect(() => {
     handleBackground(ctx, canvas, background, () => { 
-      drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2));
+      drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2), parseInt(bottomPadding));
     })
-  }, [qrCode, logo, background, topRightText, bottomLeftText1, bottomLeftText2, canvas, ctx, topFont, bottomFont1, bottomFont2]);
+  }, [qrCode, logo, background, topRightText, bottomLeftText1, bottomLeftText2, canvas, ctx, topFont, bottomFont1, bottomFont2, bottomPadding]);
 
   return (
     <div className='ad'>
@@ -94,6 +96,9 @@ const Ad = () => {
         <input type="range" min="10" max="128" value={bottomFont2} onChange={(e) => setBottomFont2(e.target.value)} />
         <input type="number" min="10" max="128" value={bottomFont2} onChange={(e) => setBottomFont2(e.target.value)} />
         <br/>
+        
+        <input type="range" min="0" max="128" value={bottomPadding} onChange={(e) => setBottomPadding(e.target.value)} />
+        <input type="number" min="0" max="128" value={bottomPadding} onChange={(e) => setBottomPadding(e.target.value)} />
         <div>
           <h1>Preview</h1>
           <button onClick={() => downloadCanvas(resetCanvasToTransparent)}>Download Image</button>
@@ -196,7 +201,7 @@ function clearScreen(ctx, canvas) {
   }
 }
 
-function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, topFont, bottomFont1, bottomFont2) {
+function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, topFont, bottomFont1, bottomFont2, bottomPadding) {
   const qrCodeSize = 280;
   const rectWidth = 1628;
   const rectHeight = 912;
@@ -206,20 +211,14 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
   // Calculate the center position of the white space
   const textX = 30//(canvasWidth - rectWidth) / 2 + rectWidth / 2;
   const textY = rectHeight + (canvasHeight - rectHeight) / 2;
-  ctx.fontWeight = 'bold';
-  ctx.fillStyle = "black";
-  ctx.strokeStyle = "black";
-  ctx.fontWeight = '900';
-  ctx.lineWidth = 3;
   // ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
   
   if (bottomLeftText1 && bottomLeftText2) {
     const totalHeight = bottomFont1 + bottomFont2;
-    const textY1 = textY - totalHeight / 4;
-    const textY2 = textY + totalHeight / 4;
-
+    const textY1 = textY - totalHeight / 4 - bottomPadding;
+    const textY2 = textY + totalHeight / 4 + bottomPadding;
     drawTextWithStroke(ctx, bottomLeftText1, textX, textY1, bottomFont1);
     drawTextWithStroke(ctx, bottomLeftText2, textX, textY2, bottomFont2);
   } else if (bottomLeftText1) {
@@ -235,15 +234,15 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
 
   let line = '';
   let fontSize = parseInt(topFont);
-  let y = padding + fontSize/2;
+  let y = padding + fontSize/2 + 10;
   if (logo) {
-    y += logoImage.height;
+    y += logoImage.height/1.5;
   }
   if (qrCode) {
     y += qrCodeSize;
   }
 
-  ctx.font = `${fontSize}px Roboto`;
+  ctx.font = `bold ${fontSize}px ${font}`;
 
   for (let n = 0; n < words.length; n++) {
     const testLine = line + words[n] + ' ';
@@ -262,7 +261,7 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
 
   //drwa black reactangle 
   ctx.fillStyle = "black";
-  ctx.fillRect(rectWidth, 0, canvasWidth - rectWidth, logoImage.height + qrCodeSize);
+  ctx.fillRect(rectWidth, 0, canvasWidth - rectWidth, logoImage.height / 1.5 + (qrCode ? qrCodeSize+ 10 : 0) );
 
   if (logo) {
     if (logoImage.src === logo) {
@@ -282,14 +281,14 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
         const x = canvas.width - qrCodeSize - 5;
         const y = 10//canvas.height - qrCodeSize - height - 10; // Subtract an additional 10 for spacing
 
-            ctx.drawImage(logoImage, x, y, qrCodeSize, height);
-          };
-          logoImage.src = logo;
-        }
-      drawQRCodeImage(qrCode, qrImage, qrCodeSize, canvas, ctx, logoImage.height);
-  } 
-  drawQRCodeImage(qrCode, qrImage, qrCodeSize, canvas, ctx);
-
+        ctx.drawImage(logoImage, x, y, qrCodeSize, height);
+      };
+      logoImage.src = logo;
+    }
+    drawQRCodeImage(qrCode, qrImage, qrCodeSize, canvas, ctx, logoImage.height / 1.5);
+  } else {
+   drawQRCodeImage(qrCode, qrImage, qrCodeSize, canvas, ctx);
+  }
   ctx.drawImage(loadedTvImage, 0, 0, 1628, 912);
 
     
@@ -308,39 +307,26 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
 // }
 
 function drawQRCodeImage(qrImagePath, imageElement, qrCodeSize, canvas, ctx, height) {
-  console.log('draw')
   if (qrImagePath) {
     const x = canvas.width - qrCodeSize - 5;
     const y = height ? height : 0;
-    console.log('draw1')
     if (imageElement.src !== qrImagePath) {
       imageElement.onload = function () {
         ctx.drawImage(imageElement, x, y, qrCodeSize, qrCodeSize);
       };
-      console.log('draw2')
       imageElement.src = qrImagePath;
     } 
-    console.log('draw3')
     ctx.drawImage(imageElement, x, y, qrCodeSize, qrCodeSize);
   }
 }
 
 function drawTextWithStroke(ctx, text, x, y, fontSize) {  
-  ctx.font = `bold ${fontSize}px `;
-  ctx.strokeStyle = 'white';
-  ctx.lineWidth = 12; // Increase the stroke width
-  ctx.shadowColor = "white"; // Set the shadow color
-  ctx.shadowBlur = 10; // Set the blur level for the shadow
-  ctx.shadowOffsetX = 3; // Set the horizontal distance of the shadow
-  ctx.shadowOffsetY = 3; // Set the vertical distance of the shadow
-  ctx.strokeText(text, x, y);
-  ctx.fillStyle = 'black';
+  ctx.font = `bold ${fontSize}px ${font}`;
   ctx.strokeStyle = 'black';
-  ctx.lineWidth = 1;
-  ctx.fillText(text, x, y);
+  ctx.lineWidth = 10; // Adjust this value to change the thickness of the outline
   ctx.strokeText(text, x, y);
-
-  //reset
+  ctx.fillStyle = 'white';
+  ctx.fillText(text, x, y);
 }
 
 async function isAnImage(blobUrl) {
