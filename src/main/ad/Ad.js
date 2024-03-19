@@ -3,7 +3,7 @@ import './Ad.css';
 // import QRCode from 'qrcode';
 
 const loadedTvImage = new Image();
-loadedTvImage.src = '/linklocalplaceholderblack.png';
+loadedTvImage.src = '/tvcontent.png';
 
 var actualCallbackToUse = null;
 const font = "Helvetica"
