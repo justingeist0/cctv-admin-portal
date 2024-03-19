@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import './Ad.css';
+import BottomPanelBackgrounds from './BottomPanelBackgrounds';
 // import QRCode from 'qrcode';
 
 const loadedTvImage = new Image();
 loadedTvImage.src = '/tvcontent.png';
+
+const loadedBackgroundImage = new Image();
+loadedBackgroundImage.src = '/background.png';
 
 var actualCallbackToUse = null;
 const font = "Helvetica"
@@ -11,6 +15,7 @@ const font = "Helvetica"
 const Ad = () => {
   const [logo, setLogo] = useState('');
   const [background, setBackground] = useState('');
+  const [bottomPanelImage, setBottomPanelImage] = useState('');
   const [topRightText, setTopRightText] = useState('');
   const [bottomLeftText1, setBottomLeftText1] = useState('');
   const [bottomLeftText2, setBottomLeftText2] = useState('');
@@ -30,16 +35,16 @@ const Ad = () => {
     const aspectRatio = 1920 / 1080;
 
     function resizeCanvas() {
-      mCanvas.style.width = window.innerWidth/2 + 'px';
+      mCanvas.style.width = window.innerWidth / 2 + 'px';
       mCanvas.style.height = window.innerWidth / 2 / aspectRatio + 'px';
     }
-  
+
     //window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-  
+
     const width = 1920; // Width of the canvas
     const height = 1080; // Height of the canvas
-    
+
     // Set the canvas dimensions
     mCanvas.width = width;
     mCanvas.height = height;
@@ -47,65 +52,69 @@ const Ad = () => {
     setCanvas(mCanvas);
 
     clearScreen(mCtx, mCanvas);
-    mCtx.drawImage(loadedTvImage, 0, 0, 1628,912);
+    mCtx.drawImage(loadedTvImage, 0, 0, 1628, 912);
   }, [ctx, canvas]);
 
   const resetCanvasToTransparent = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2), parseInt(bottomPadding));
+    drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, bottomPanelImage, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2), parseInt(bottomPadding));
   }
 
   useEffect(() => {
-    handleBackground(ctx, canvas, background, () => { 
-      drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2), parseInt(bottomPadding));
+    console.log(bottomPanelImage)
+    handleBackground(ctx, canvas, background, bottomPanelImage, () => {
+      drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, bottomPanelImage, parseInt(topFont), parseInt(bottomFont1), parseInt(bottomFont2), parseInt(bottomPadding));
     })
-  }, [qrCode, logo, background, topRightText, bottomLeftText1, bottomLeftText2, canvas, ctx, topFont, bottomFont1, bottomFont2, bottomPadding]);
+  }, [qrCode, logo, background, topRightText, bottomLeftText1, bottomLeftText2, canvas, ctx, topFont, bottomFont1, bottomFont2, bottomPadding, bottomPanelImage]);
 
   return (
     <div className='ad'>
-        <h2>Company Logo (Image above barcode)</h2>
-        <input type="file" accept="image/*" onChange={(e) => {
-            if (e.target.files.length > 0) {
-                setLogo(URL.createObjectURL(e.target.files[0]));
-            }
-        }} /><br/>
-        <h2>Background Image or Video</h2>
-        <input type="file" accept="image/*,video/*" onChange={(e) => {
-            if (e.target.files.length > 0) {
-                setBackground(URL.createObjectURL(e.target.files[0]));
-            }
-        }} /><br/>
-        <h2>Enter Company Website</h2>
-        <input type="file" accept="image/*" onChange={(e) => {
-            if (e.target.files.length > 0) {
-                setQrCode(URL.createObjectURL(e.target.files[0]));
-            }
-        }} /><br/>
-        <h2>Top Right Text</h2>
-        <input type="text" placeholder="Top right text" value={topRightText} onChange={(e) => setTopRightText(e.target.value)} />
-        <input type="range" min="10" max="128" value={topFont} onChange={(e) => setTopFont(e.target.value)} />
-        <input type="number" min="10" max="128" value={topFont} onChange={(e) => setTopFont(e.target.value)} />
-        <br/>
-        <h2>Bottom Text 1</h2>
-        <input type="text" placeholder="Bottom left top text" value={bottomLeftText1} onChange={(e) => setBottomLeftText1(e.target.value)} />
-        <input type="range" min="10" max="128" value={bottomFont1} onChange={(e) => setBottomFont1(e.target.value)} />
-        <input type="number" min="10" max="128" value={bottomFont1} onChange={(e) => setBottomFont1(e.target.value)} />
-        <br/>
-        <h2>Bottom Text 2</h2>
-        <input type="text" placeholder="Bottom left bottom text" value={bottomLeftText2} onChange={(e) => setBottomLeftText2(e.target.value)} />
-        <input type="range" min="10" max="128" value={bottomFont2} onChange={(e) => setBottomFont2(e.target.value)} />
-        <input type="number" min="10" max="128" value={bottomFont2} onChange={(e) => setBottomFont2(e.target.value)} />
-        <br/>
-        
-        <input type="range" min="0" max="128" value={bottomPadding} onChange={(e) => setBottomPadding(e.target.value)} />
-        <input type="number" min="0" max="128" value={bottomPadding} onChange={(e) => setBottomPadding(e.target.value)} />
-        <div>
-          <h1>Preview</h1>
-          <button onClick={() => downloadCanvas(resetCanvasToTransparent)}>Download Image</button>
-        </div>
-        <canvas id="canvas" width="1920" height="1080">
-          Your browser does not support the canvas element.
-        </canvas>
+      <h2>Top Right Company Logo*</h2>
+      <input type="file" accept="image/*" onChange={(e) => {
+        if (e.target.files.length > 0) {
+          setLogo(URL.createObjectURL(e.target.files[0]));
+        }
+      }} /><br />
+      <h2>Right side panel Image or Video* (292x1080)</h2>
+      <input type="file" accept="image/*,video/*" onChange={(e) => {
+        if (e.target.files.length > 0) {
+          setBackground(URL.createObjectURL(e.target.files[0]));
+        }
+      }} /><br />
+      <h2>QR Code Image Top Right (optional)</h2>
+      <input type="file" accept="image/*" onChange={(e) => {
+        if (e.target.files.length > 0) {
+          setQrCode(URL.createObjectURL(e.target.files[0]));
+        }
+      }} /><br />
+
+      <h2>Bottom panel background</h2>
+      <BottomPanelBackgrounds setBottomPanelImage={setBottomPanelImage} />
+      <h2>Top Right Text</h2>
+      <input type="text" placeholder="Top right text" value={topRightText} onChange={(e) => setTopRightText(e.target.value)} />
+      <input type="range" min="10" max="128" value={topFont} onChange={(e) => setTopFont(e.target.value)} />
+      <input type="number" min="10" max="128" value={topFont} onChange={(e) => setTopFont(e.target.value)} />
+      <br />
+      <h2>Bottom Text 1</h2>
+      <input type="text" placeholder="Bottom left top text" value={bottomLeftText1} onChange={(e) => setBottomLeftText1(e.target.value)} />
+      <input type="range" min="10" max="128" value={bottomFont1} onChange={(e) => setBottomFont1(e.target.value)} />
+      <input type="number" min="10" max="128" value={bottomFont1} onChange={(e) => setBottomFont1(e.target.value)} />
+      <br />
+      <h2>Bottom Text 2</h2>
+      <input type="text" placeholder="Bottom left bottom text" value={bottomLeftText2} onChange={(e) => setBottomLeftText2(e.target.value)} />
+      <input type="range" min="10" max="128" value={bottomFont2} onChange={(e) => setBottomFont2(e.target.value)} />
+      <input type="number" min="10" max="128" value={bottomFont2} onChange={(e) => setBottomFont2(e.target.value)} />
+      <br />
+
+      <input type="range" min="0" max="128" value={bottomPadding} onChange={(e) => setBottomPadding(e.target.value)} />
+      <input type="number" min="0" max="128" value={bottomPadding} onChange={(e) => setBottomPadding(e.target.value)} />
+      <div>
+        <h1>Preview</h1>
+        <button onClick={() => downloadCanvas(resetCanvasToTransparent)}>Download Image</button>
+      </div>
+      <canvas id="canvas" width="1920" height="1080">
+        Your browser does not support the canvas element.
+      </canvas>
     </div>
   );
 };
@@ -117,8 +126,9 @@ const qrImage = new Image();
 let prevBackground;
 let isBackgroundAnImage;
 
-function handleBackground(ctx, canvas, background, drawOverlayHelper) {
+function handleBackground(ctx, canvas, background, bottomPanelImage, drawOverlayHelper) {
   if (!ctx || !canvas) return;
+
   if (background) {
     const needsToLoad = prevBackground !== background;
     if (needsToLoad) {
@@ -137,14 +147,14 @@ function handleBackground(ctx, canvas, background, drawOverlayHelper) {
         }
 
         if (isBackgroundAnImage === true) {
-          backgroundImage.onload = function() {
+          backgroundImage.onload = function () {
 
-          clearScreen(ctx, canvas);
-            handleBackground(ctx, canvas, background, drawOverlayHelper);
+            clearScreen(ctx, canvas);
+            handleBackground(ctx, canvas, background, bottomPanelImage, drawOverlayHelper);
           };
           backgroundImage.src = background;
-        } 
-        
+        }
+
         if (isBackgroundAnImage === false) {
           backgroundVideo.onloadedmetadata = null
           backgroundVideo.src = background;
@@ -153,55 +163,75 @@ function handleBackground(ctx, canvas, background, drawOverlayHelper) {
 
           clearScreen(ctx, canvas);
           backgroundVideo.load();
-          handleBackground(ctx, canvas, background, drawOverlayHelper);
+          handleBackground(ctx, canvas, background, bottomPanelImage, drawOverlayHelper);
         }
       });
       return
-  }
+    }
 
-  if (isBackgroundAnImage) {
-    clearScreen(ctx, canvas);
-    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-    drawOverlayHelper();
-  } else {
-    actualCallbackToUse = drawOverlayHelper;
-    backgroundVideo.onloadedmetadata = function() {
-      backgroundVideo.play();
+    if (isBackgroundAnImage) {
+      clearScreen(ctx, canvas);
+      ctx.drawImage(backgroundImage, 1628, 0, 292, canvas.height);
+      drawGradient(ctx, 1628, 0, 292, canvas.height);
+      drawOverlayHelper();
+    } else {
+      actualCallbackToUse = drawOverlayHelper;
+      backgroundVideo.onloadedmetadata = function () {
+        backgroundVideo.play();
         function drawVideo() {
-            if (backgroundVideo.readyState === backgroundVideo.HAVE_ENOUGH_DATA) {
-                ctx.drawImage(backgroundVideo, 0, 0, canvas.width, canvas.height);
-                actualCallbackToUse();
-            }
-            if (background === backgroundVideo.src)
-              requestAnimationFrame(drawVideo);
+          if (backgroundVideo.readyState === backgroundVideo.HAVE_ENOUGH_DATA) {
+            ctx.drawImage(backgroundVideo, 0, 0, canvas.width, canvas.height);
+            actualCallbackToUse();
+          }
+          if (background === backgroundVideo.src)
+            requestAnimationFrame(drawVideo);
         }
 
         drawVideo();
-    };
-  }
-} else {
+      };
+    }
+  } else {
     clearScreen(ctx, canvas);
     drawOverlayHelper();
   }
+
 }
+
+function drawGradient(ctx, x, y, width, height) {
+  // Save the current state
+  ctx.save();
+
+  // Create gradient
+  let gradient = ctx.createLinearGradient(0, 0, 0, height);
+  gradient.addColorStop(0, 'black');
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+  // Apply gradient
+  ctx.fillStyle = gradient;
+  ctx.fillRect(x, y, width, height);
+
+  // Restore the original state
+  ctx.restore();
+}
+
 
 function clearScreen(ctx, canvas) {
   const squareSize = 10; // Size of each square
   const colors = ['white', 'lightgrey']; // Colors for the squares
 
   for (let y = 0; y < canvas.height; y += squareSize) {
-      for (let x = 0; x < canvas.width; x += squareSize) {
-          // Calculate the index for the colors array based on the row and column
-          const colorIndex = (Math.floor(x / squareSize) + Math.floor(y / squareSize)) % colors.length;
+    for (let x = 0; x < canvas.width; x += squareSize) {
+      // Calculate the index for the colors array based on the row and column
+      const colorIndex = (Math.floor(x / squareSize) + Math.floor(y / squareSize)) % colors.length;
 
-          // Set the fill style and draw the square
-          ctx.fillStyle = colors[colorIndex];
-          ctx.fillRect(x, y, squareSize, squareSize);
-      }
+      // Set the fill style and draw the square
+      ctx.fillStyle = colors[colorIndex];
+      ctx.fillRect(x, y, squareSize, squareSize);
+    }
   }
 }
 
-function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, topFont, bottomFont1, bottomFont2, bottomPadding) {
+function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, bottomLeftText2, bottomPanelImage, topFont, bottomFont1, bottomFont2, bottomPadding) {
   const qrCodeSize = 280;
   const rectWidth = 1628;
   const rectHeight = 912;
@@ -215,6 +245,21 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
   ctx.textBaseline = "middle";
 
   
+  if (bottomPanelImage === '') {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 912, 1920, 1080);
+  
+  } if (bottomPanelImage === loadedBackgroundImage.src)
+    ctx.drawImage(loadedBackgroundImage, 0, 912);
+  else {
+    loadedBackgroundImage.onload = function () {
+      ctx.drawImage(loadedBackgroundImage, 0, 912);
+    }
+    loadedBackgroundImage.src = bottomPanelImage;
+  }
+
+
+
   if (bottomLeftText1 && bottomLeftText2) {
     const totalHeight = bottomFont1 + bottomFont2;
     const textY1 = textY - totalHeight / 4 - bottomPadding;
@@ -234,9 +279,9 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
 
   let line = '';
   let fontSize = parseInt(topFont);
-  let y = padding + fontSize/2 + 10;
+  let y = padding + fontSize / 2 + 10;
   if (logo) {
-    y += logoImage.height/1.5;
+    y += logoImage.height / 1.5;
   }
   if (qrCode) {
     y += qrCodeSize;
@@ -261,7 +306,7 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
 
   //drwa black reactangle 
   ctx.fillStyle = "black";
-  ctx.fillRect(rectWidth, 0, canvasWidth - rectWidth, logoImage.height / 1.5 + (qrCode ? qrCodeSize+ 10 : 0) );
+  //ctx.fillRect(rectWidth, 0, canvasWidth - rectWidth, logoImage.height / 1.5 + (qrCode ? qrCodeSize + 10 : 0));
 
   if (logo) {
     if (logoImage.src === logo) {
@@ -273,7 +318,7 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
       const y = 10//canvas.height - qrCodeSize - height - 10; // Subtract an additional 10 for spacing
       ctx.drawImage(logoImage, x, y, qrCodeSize, height);
     } else {
-      logoImage.onload = function() {
+      logoImage.onload = function () {
         // Calculate the height to maintain the aspect ratio
         const height = qrCodeSize * (logoImage.height / logoImage.width);
 
@@ -287,11 +332,11 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
     }
     drawQRCodeImage(qrCode, qrImage, qrCodeSize, canvas, ctx, logoImage.height / 1.5);
   } else {
-   drawQRCodeImage(qrCode, qrImage, qrCodeSize, canvas, ctx);
+    drawQRCodeImage(qrCode, qrImage, qrCodeSize, canvas, ctx);
   }
   ctx.drawImage(loadedTvImage, 0, 0, 1628, 912);
 
-    
+
 }
 
 // function createQRcodeImage(url, qrCodeSize, canvas, ctx) {
@@ -306,6 +351,8 @@ function drawOverlay(ctx, canvas, qrCode, logo, topRightText, bottomLeftText1, b
 //   });
 // }
 
+
+//TODO bug fix width of image is 1060 and it's make barcode draw super low. to fix make the y position dependent on the height of the image
 function drawQRCodeImage(qrImagePath, imageElement, qrCodeSize, canvas, ctx, height) {
   if (qrImagePath) {
     const x = canvas.width - qrCodeSize - 5;
@@ -315,12 +362,12 @@ function drawQRCodeImage(qrImagePath, imageElement, qrCodeSize, canvas, ctx, hei
         ctx.drawImage(imageElement, x, y, qrCodeSize, qrCodeSize);
       };
       imageElement.src = qrImagePath;
-    } 
-    ctx.drawImage(imageElement, x, y, qrCodeSize, qrCodeSize);
+    }
+    ctx.drawImage(imageElement, x, 110, qrCodeSize, qrCodeSize);
   }
 }
 
-function drawTextWithStroke(ctx, text, x, y, fontSize) {  
+function drawTextWithStroke(ctx, text, x, y, fontSize) {
   ctx.font = `bold ${fontSize}px ${font}`;
   ctx.strokeStyle = 'black';
   ctx.lineWidth = 10; // Adjust this value to change the thickness of the outline
@@ -333,11 +380,11 @@ async function isAnImage(blobUrl) {
   const response = await fetch(blobUrl);
   const blob = await response.blob();
   if (blob.type.startsWith('image/')) {
-      return true;
+    return true;
   } else if (blob.type.startsWith('video/')) {
-      return false;
+    return false;
   } else {
-      return null;
+    return null;
   }
 }
 

@@ -249,7 +249,7 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
           <div className='cursor-pointer' onClick={async () => {
               if (typeof window !== 'undefined') {
                   const newClipItem = new ClipboardItem({
-                      "text/plain": new Blob([`https://cc-tv.onrender.com/obs?deviceId=${device._id}`], {type: "text/plain"})
+                      "text/plain": new Blob([`https://linklocal.onrender.com/obs?deviceId=${device._id}`], {type: "text/plain"})
                   });
                   await navigator.clipboard.write([newClipItem]);
                   alert("Copied OBS Link to Clipboard")
@@ -258,7 +258,7 @@ const Device = ({ device, selectDevice, deviceState, setDeviceState }) => {
             <IconInputText 
               src={<Info className="text-input-icon" />} 
               placeholderText={""} 
-              text={`https://cc-tv.onrender.com/obs?deviceId=${device._id}`} 
+              text={`https://linklocal.onrender.com/obs?deviceId=${device._id}`} 
               handleInputChange={(e) =>{ }}
             />
           </div>
